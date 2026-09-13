@@ -16,5 +16,11 @@ class CityRepository {
         _cities.add(city)
     }
 
+    fun updateCity(oldCity: City, updatedCity: City) {
+        val index = _cities.indexOf(oldCity)
 
+        if (index != -1) { // check the city actually exists
+            _cities[index] = updatedCity // replace old object
+        }
+    }
 }

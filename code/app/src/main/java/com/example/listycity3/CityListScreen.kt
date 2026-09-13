@@ -25,17 +25,22 @@ import com.example.listycity3.ui.theme.ListyCity3Theme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.clickable
+
 
 @Composable
 fun CityListScreen(
     cities: List<City>,
     onAddCity: (City) -> Unit,
+    onUpdateCity: (City, City) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var newCityName by remember { mutableStateOf("") }
     var newProvinceName by remember { mutableStateOf("") }
     var showAddCityFields by remember { mutableStateOf(false) }
-
+    var selectedCity by remember { mutableStateOf<City?>(null) }
+    var updatedCityName by remember { mutableStateOf("") }
+    var updatedProvinceName by remember { mutableStateOf("") }
 
     Column(modifier = modifier.fillMaxSize()) {
         Row(
@@ -96,12 +101,73 @@ fun CityListScreen(
                 }
             }
         }
+
+        if (selectedCity != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                OutlinedTextField(
+                    value = updatedCityName,
+                    onValueChange = { updatedCityName = it },
+                    label = { Text("Updated City") },
+                    modifier = Modifier.weight(1f)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                OutlinedTextField(
+                    value = updatedProvinceName,
+                    onValueChange = { updatedProvinceName = it },
+                    label = { Text("Updated Province") },
+                    modifier = Modifier.weight(1f)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Button(
+                    modifier = Modifier.padding(vertical = 12.dp),
+                    onClick = {
+                        val oldCity = selectedCity
+
+                        if (
+                            oldCity != null &&
+                            updatedCityName.isNotBlank() &&
+                            updatedProvinceName.isNotBlank()
+                        ) {
+                            val updatedCity = City(
+                                name = updatedCityName.trim(),
+                                province = updatedProvinceName.trim()
+                            )
+
+                            onUpdateCity(oldCity, updatedCity)
+
+                            selectedCity = null
+                            updatedCityName = ""
+                            updatedProvinceName = ""
+                        }
+                    }
+                ) {
+                    Text("Update City")
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.width(8.dp))
 
 
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             itemsIndexed(cities) { index, city ->
-                CityRow(city = city)
+                CityRow(
+                    city = city,
+                    onClick = {
+                        selectedCity = city
+                        updatedCityName = city.name
+                        updatedProvinceName = city.province
+                        showAddCityFields = false
+                    }
+                )
                 if (index < cities.lastIndex) {
                     HorizontalDivider()
                 }
@@ -111,10 +177,14 @@ fun CityListScreen(
 }
 
 @Composable
-fun CityRow(city: City) {
+fun CityRow(
+    city: City,
+    onClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onClick)
             .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Text(
@@ -141,7 +211,8 @@ fun CityListScreenPreview() {
                 City("Vancouver", "BC"),
                 City("Calgary", "AB")
             ),
-            onAddCity = {}
+            onAddCity = {},
+            onUpdateCity = { _, _ -> }
         )
     }
 }

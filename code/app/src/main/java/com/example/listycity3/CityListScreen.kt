@@ -22,6 +22,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.listycity3.ui.theme.ListyCity3Theme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.foundation.layout.fillMaxSize
 
 @Composable
 fun CityListScreen(
@@ -31,50 +34,72 @@ fun CityListScreen(
 ) {
     var newCityName by remember { mutableStateOf("") }
     var newProvinceName by remember { mutableStateOf("") }
+    var showAddCityFields by remember { mutableStateOf(false) }
 
-    Column(modifier = modifier) {
+
+    Column(modifier = modifier.fillMaxSize()) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
         ) {
-            OutlinedTextField(
-                value = newCityName,
-                onValueChange = { newCityName = it },
-                label = { Text("City") },
-                modifier = Modifier.weight(1f)
-            )
+            FloatingActionButton(
+                modifier = Modifier.padding(16.dp),
+                onClick = {
+                    showAddCityFields = !showAddCityFields
+                }
+            ) {
+                Text("+")
+            }
         }
+        if (showAddCityFields) {
 
-        Spacer(modifier = Modifier.width(8.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                OutlinedTextField(
+                    value = newCityName,
+                    onValueChange = { newCityName = it },
+                    label = { Text("City") },
+                    modifier = Modifier.weight(1f)
+                )
 
-        OutlinedTextField(
-            value = newProvinceName,
-            onValueChange = { newProvinceName = it },
-            label = { Text("Province") },
-            modifier = Modifier.weight(1f)
-        )
+                Spacer(modifier = Modifier.width(8.dp))
 
-        Spacer(modifier = Modifier.width(8.dp))
+                OutlinedTextField(
+                    value = newProvinceName,
+                    onValueChange = { newProvinceName = it },
+                    label = { Text("Province") },
+                    modifier = Modifier.weight(1f)
+                )
 
-        Button(
-            modifier = Modifier.padding(vertical = 12.dp),
-            onClick = {
-                if (newCityName.isNotBlank() && newProvinceName.isNotBlank()) {
-                    onAddCity(
-                        City(
-                            name = newCityName,
-                            province = newProvinceName
-                        )
-                    )
-                    newCityName = ""
-                    newProvinceName = ""
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Button(
+                    modifier = Modifier.padding(vertical = 12.dp),
+                    onClick = {
+                        if (newCityName.isNotBlank() && newProvinceName.isNotBlank()) {
+                            onAddCity(
+                                City(
+                                    name = newCityName,
+                                    province = newProvinceName
+                                )
+                            )
+                            newCityName = ""
+                            newProvinceName = ""
+                            showAddCityFields = false
+                        }
+                    }
+                ) {
+                    Text("Add City")
                 }
             }
-        ) {
-            Text("Add City")
         }
-        LazyColumn(modifier = Modifier) {
+        Spacer(modifier = Modifier.width(8.dp))
+
+
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
             itemsIndexed(cities) { index, city ->
                 CityRow(city = city)
                 if (index < cities.lastIndex) {
